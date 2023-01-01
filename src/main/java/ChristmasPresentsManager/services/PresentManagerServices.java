@@ -24,39 +24,43 @@ public class PresentManagerServices {
      */
     public void addPresent() throws SQLException {
         boolean presentIsBoughtStatus;
-        double price = 0;
+        double price;
         Scanner newPresentInfoInput = new Scanner(System.in);
         System.out.println("Kad prideti dovana, reikia ivesti siuos duomenis: \n");
         System.out.println("Dovana, parduotuve, kaina, adresatas, ar dovana nupirkta? (true/false). Duomenis atskirti per ;");
-        String givenPresentInfo = newPresentInfoInput.next();
-        String[] presentData = givenPresentInfo.split(";");
-        String presentName = presentData[0];
-        String shopName = presentData[1];
-        String priceStr = presentData[2];
-        if (doubleFormatParserChecker(priceStr)) {
-            price = Double.parseDouble(priceStr);
-        } else {
-            return;
-        }
-        String addressee = presentData[3];
-        String isBought = presentData[4];
-        if (booleanFormatParserChecker(isBought)) {
-            presentIsBoughtStatus = Boolean.parseBoolean(isBought);
-        } else {
-            return;
-        }
-        int nextId = findLowestUnusedId();
-        if (!presentName.isEmpty() && !shopName.isEmpty() && price != 0 && !addressee.isEmpty()) {
-            String addPresentQuery = nextId + ", '"
-                    + presentName + "', '"
-                    + shopName + "', "
-                    + price + ", '"
-                    + addressee + "', "
-                    + presentIsBoughtStatus;
-            sqlManager.addPresentToDB(addPresentQuery);
-            System.out.println("\n Dovana prideta i sarasa sekmingai! \n");
-        } else {
-            System.out.println("Informacija ivesta nepilnai arba netinkamai");
+        try {
+            String givenPresentInfo = newPresentInfoInput.next();
+            String[] presentData = givenPresentInfo.split(";");
+            String presentName = presentData[0];
+            String shopName = presentData[1];
+            String priceStr = presentData[2];
+            if (doubleFormatParserChecker(priceStr)) {
+                price = Double.parseDouble(priceStr);
+            } else {
+                return;
+            }
+            String addressee = presentData[3];
+            String isBought = presentData[4];
+            if (booleanFormatParserChecker(isBought)) {
+                presentIsBoughtStatus = Boolean.parseBoolean(isBought);
+            } else {
+                return;
+            }
+            int nextId = findLowestUnusedId();
+            if (!presentName.isEmpty() && !shopName.isEmpty() && price != 0 && !addressee.isEmpty()) {
+                String addPresentQuery = nextId + ", '"
+                        + presentName + "', '"
+                        + shopName + "', "
+                        + price + ", '"
+                        + addressee + "', "
+                        + presentIsBoughtStatus;
+                sqlManager.addPresentToDB(addPresentQuery);
+                System.out.println("\n Dovana prideta i sarasa sekmingai! \n");
+            } else {
+                System.out.println("Informacija ivesta nepilnai arba netinkamai");
+            }
+        } catch (ArrayIndexOutOfBoundsException e){
+            System.out.println("Ivesti ne visi reikiami laukai");
         }
     }
 
@@ -93,7 +97,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds all already bought presents
      */
     public void findAllBoughtPresents() {
         printerMethods.printingListOfPresents(SQLManager.presentsList.stream()
@@ -102,7 +106,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds presents by given addressee
      */
     public void findPresentsByAddressee() {
         Scanner addresseInput = new Scanner(System.in);
@@ -118,7 +122,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds the cheapest present from the list
      */
     public void findCheapestPresent() {
         OptionalDouble smallestPresentPrice = SQLManager.presentsList.stream()
@@ -130,7 +134,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds most expensive present
      */
     public void findMostExpensivePresent() {
         OptionalDouble biggestPresentPrice = SQLManager.presentsList.stream()
@@ -142,7 +146,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds presents by shop
      */
     public void findPresentsByShop() {
         Scanner shopInput = new Scanner(System.in);
@@ -157,6 +161,9 @@ public class PresentManagerServices {
         }
     }
 
+    /**
+     * Finds present by given price.
+     */
     public void findPresentsByPriceSubMenu() {
         System.out.println();
         System.out.println("Pasirinktite pagal koki kainos aspekta bus ieskoma dovanu:");
@@ -186,7 +193,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds presents who cost more than given price
      */
     private void findPresentMoreExpensiveThanGivenPrice() {
         System.out.println("Iveskite kaina");
@@ -200,7 +207,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Finds presents who cost less than given price
      */
     private void findPresentsCheaperThanGivenPrice() {
         System.out.println("Iveskite kaina");
@@ -213,7 +220,9 @@ public class PresentManagerServices {
         }
     }
 
-
+    /**
+     * Finds presents in between given prices
+     */
     private void findPresentsBetweenPrices() {
         double priceFrom;
         double priceUntil;
@@ -234,7 +243,8 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param selectedId
+     * Menu for info change of chosen present
+     * @param selectedId - given id of a present we want to change some info.
      */
     private void updatePresentSubMenu(int selectedId) {
         try {
@@ -274,9 +284,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param selectedId
-     * @param newInfo
-     * @throws SQLException
+     * Update present is bought status
+     * @param selectedId - given id of a present we want to change some info.
+     * @param newInfo - entered new info
      */
     private void updatePresentIsBoughtStatus(int selectedId, Scanner newInfo) throws SQLException {
         System.out.println("Ar dovana buvo nupirkta ? (true/false)");
@@ -298,9 +308,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param selectedId
-     * @param newInfo
-     * @throws SQLException
+     * Update present addressee
+     * @param selectedId - given id of a present we want to change some info.
+     * @param newInfo - entered new info
      */
     private void updatePresentAddressee(int selectedId, Scanner newInfo) throws SQLException {
         System.out.println("Iveskite nauja adresata");
@@ -311,9 +321,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param selectedId
-     * @param newInfo
-     * @throws SQLException
+     * Update present price
+     * @param selectedId - given id of a present we want to change some info.
+     * @param newInfo - entered new info
      */
     private void updatePresentPrice(int selectedId, Scanner newInfo) throws SQLException {
         System.out.println("Iveskite nauja kaina. Centai vedami po tasko");
@@ -327,9 +337,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param selectedId
-     * @param newInfo
-     * @throws SQLException
+     * Update present shop name
+     * @param selectedId - given id of a present we want to change some info.
+     * @param newInfo - entered new info
      */
     private void updatePresentShopName(int selectedId, Scanner newInfo) throws SQLException {
         System.out.println("Iveskite nauja parduotuve");
@@ -340,9 +350,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param selectedId
-     * @param newInfo
-     * @throws SQLException
+     * Update presents name
+     * @param selectedId - given id of a present we want to change some info.
+     * @param newInfo - entered new info
      */
     private void updatePresentName(int selectedId, Scanner newInfo) throws SQLException {
         System.out.println("Iveskite nauja dovana");
@@ -353,9 +363,7 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param
-     * @param
-     * @return
+     * Gets entered ID by checking if it is in right format.
      */
     private int getSelectedId() {
         int selectedId = 0;
@@ -369,7 +377,7 @@ public class PresentManagerServices {
     }
 
     /**
-     *
+     * Menu for asking if user needs to see the full present list again.
      */
     private void basicInfoForUser() {
         Scanner listPrinting = new Scanner(System.in);
@@ -386,8 +394,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param doubleString
-     * @return
+     * Check if string can be parsed to double
+     * @param doubleString - given string
+     * @return - returning true or false on a question that entered string can be parsed to double format
      */
     private boolean doubleFormatParserChecker(String doubleString) {
         boolean canBeParsed = false;
@@ -395,11 +404,16 @@ public class PresentManagerServices {
             Double.parseDouble(doubleString);
             canBeParsed = true;
         } catch (NumberFormatException s) {
-            System.out.println("Ivesta kaina turi buti su tasku");
+            System.out.println("Netinkamas kainos formatas. Ivestas ne skaicius, arba skaicius su kableliu (turi buti taskas)");
         }
         return canBeParsed;
     }
 
+    /**
+     * Checking if given string can be parsed to boolean type
+     * @param givenBooleanString - given string
+     * @return - returning true or false on a question that entered string can be parsed to boolean
+     */
     private boolean booleanFormatParserChecker(String givenBooleanString) {
         boolean booleanStatus = false;
         if (givenBooleanString.equalsIgnoreCase("true") || givenBooleanString.equalsIgnoreCase("false")) {
@@ -411,7 +425,8 @@ public class PresentManagerServices {
     }
 
     /**
-     * @return
+     * Finds the lowest unused id
+     * @return - returns id
      */
     private int findLowestUnusedId() {
         int freeId = 1;
@@ -427,8 +442,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param givenID
-     * @return
+     * Checks if id is in the present list
+     * @param givenID - entered id
+     * @return - returns true or false
      */
     private boolean idCheckForExistence(int givenID) {
         for (Present present : SQLManager.presentsList) {
@@ -440,8 +456,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param givenAddressee
-     * @return
+     * Checks if entered addressee is in the presents list
+     * @param givenAddressee - given addressee
+     * @return - returns true or false
      */
     private boolean addresseeCheckForExistence(String givenAddressee) {
         boolean isAddresseeValid = false;
@@ -455,8 +472,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param givenShop
-     * @return
+     * Checks if entered shop is in the presents list
+     * @param givenShop - given shop
+     * @return - returns true or false
      */
     private boolean shopCheckForExistence(String givenShop) {
         boolean isShopValid = false;
@@ -470,8 +488,9 @@ public class PresentManagerServices {
     }
 
     /**
-     * @param givenID
-     * @return
+     * Checks is bought status
+     * @param givenID - given id
+     * @return - returns given present is bought status
      */
     private boolean isBoughtChecker(int givenID) {
         boolean checkResult = false;
